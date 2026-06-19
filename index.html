@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futures Fundamentals — Reference Library</title>
+<style>
+  :root{
+    --bg:#0b0d12;
+    --panel:#12151c;
+    --panel-2:#171b24;
+    --border:#252a36;
+    --text:#e7e9ee;
+    --sub:#8c93a3;
+    --accent:#3ea6ff;
+    --amber:#e0a839;
+    --green:#33c481;
+    --mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+    --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ───────── Top ticker bar ───────── */
+  .ticker-bar{
+    background:var(--panel-2);
+    border-bottom:1px solid var(--border);
+    overflow:hidden;
+    white-space:nowrap;
+    height:30px;
+    display:flex;
+    align-items:center;
+  }
+  .ticker-track{
+    display:inline-flex;
+    animation:scroll-left 48s linear infinite;
+    padding-left:100%;
+  }
+  .ticker-track span{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--sub);
+    margin-right:36px;
+    letter-spacing:0.02em;
+  }
+  .ticker-track span b{color:var(--text);font-weight:600;}
+  .ticker-track .up{color:var(--green);}
+  .ticker-track .dn{color:#ff5c6c;}
+  @keyframes scroll-left{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-100%);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ticker-track{animation:none;}
+  }
+
+  /* ───────── Header ───────── */
+  header{
+    padding:42px 28px 22px;
+    max-width:1180px;
+    margin:0 auto;
+    border-bottom:1px solid var(--border);
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--sans);
+    font-size:clamp(28px,4vw,42px);
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin:0 0 8px;
+    color:#fff;
+  }
+  .subtitle{
+    color:var(--sub);
+    font-size:15px;
+    max-width:640px;
+    line-height:1.55;
+    margin:0;
+  }
+  .meta-row{
+    display:flex;
+    gap:28px;
+    margin-top:22px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--sub);
+    flex-wrap:wrap;
+  }
+  .meta-row strong{color:var(--text);font-weight:600;}
+
+  /* ───────── Tabs ───────── */
+  nav.tabs{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 28px;
+    display:flex;
+    gap:4px;
+    overflow-x:auto;
+    border-bottom:1px solid var(--border);
+    scrollbar-width:none;
+  }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    background:none;
+    border:none;
+    color:var(--sub);
+    font-family:var(--sans);
+    font-size:13.5px;
+    font-weight:600;
+    padding:16px 18px 14px;
+    cursor:pointer;
+    white-space:nowrap;
+    border-bottom:2px solid transparent;
+    transition:color .15s ease, border-color .15s ease;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .tab-btn .count{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--sub);
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:1px 7px;
+  }
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:#fff;border-bottom-color:var(--accent);}
+  .tab-btn.active .count{color:var(--accent);border-color:var(--accent);}
+
+  /* ───────── Main content ───────── */
+  main{
+    max-width:1180px;
+    margin:0 auto;
+    padding:32px 28px 80px;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;animation:fade-in .25s ease;}
+  @keyframes fade-in{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .panel-desc{
+    color:var(--sub);
+    font-size:13.5px;
+    line-height:1.6;
+    max-width:760px;
+    margin:0 0 26px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:12px;
+  }
+
+  .card{
+    display:block;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:16px 18px;
+    text-decoration:none;
+    color:var(--text);
+    transition:border-color .15s ease, background .15s ease, transform .15s ease;
+    position:relative;
+  }
+  .card:hover{
+    border-color:var(--accent);
+    background:var(--panel-2);
+    transform:translateY(-1px);
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .card-name{
+    font-size:14.5px;
+    font-weight:600;
+    line-height:1.3;
+    color:#fff;
+  }
+  .card-ticker{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--accent);
+    background:rgba(62,166,255,0.1);
+    border:1px solid rgba(62,166,255,0.25);
+    border-radius:4px;
+    padding:2px 6px;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .card-meta{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--sub);
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .card-arrow{
+    position:absolute;
+    right:16px;
+    bottom:14px;
+    font-size:13px;
+    color:var(--border);
+    transition:color .15s ease, transform .15s ease;
+  }
+  .card:hover .card-arrow{color:var(--accent);transform:translateX(2px);}
+
+  .group-title{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--sub);
+    margin:30px 0 12px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--border);
+  }
+  .group-title:first-of-type{margin-top:0;}
+
+  .pair-note{
+    font-size:11.5px;
+    color:var(--sub);
+    margin-top:4px;
+  }
+  .pair-note b{color:var(--amber);font-weight:600;}
+
+  footer{
+    max-width:1180px;
+    margin:0 auto;
+    padding:24px 28px 40px;
+    border-top:1px solid var(--border);
+    color:var(--sub);
+    font-size:12px;
+    font-family:var(--mono);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  footer a{color:var(--sub);text-decoration:none;}
+  footer a:hover{color:var(--accent);}
+
+  @media (max-width:600px){
+    header{padding:30px 18px 18px;}
+    nav.tabs{padding:0 18px;}
+    main{padding:24px 18px 60px;}
+    .meta-row{gap:16px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="ticker-bar">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<header>
+  <p class="eyebrow">Futures First — Warsaw Office · Internal Education Material</p>
+  <h1>Futures Fundamentals Reference Library</h1>
+  <p class="subtitle">A dark-themed reference series on contract specifications, supply and demand drivers,
+  curve structure, and spread mechanics across the futures markets covered in junior analyst training.
+  Click a tab to browse by asset class, then click a market to open its PDF.</p>
+  <div class="meta-row">
+    <span><strong id="totalDocs">—</strong> documents</span>
+    <span><strong id="totalPages">~360</strong> pages</span>
+    <span><strong>6</strong> asset classes</span>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs"></nav>
+
+<main id="main"></main>
+
+<footer>
+  <span>Built for Futures First analyst training · not investment advice</span>
+  <a href="https://github.com" target="_blank" rel="noopener">View source</a>
+</footer>
+
+<script>
+/* ============================================================
+   DATA
+   Each PDF lives in /pdfs/ alongside this index.html.
+   Update `file` values if you rename or move the PDFs.
+============================================================ */
+const DATA = {
+  softs: {
+    label: "Softs",
+    desc: "Tropical and agricultural softs traded on ICE — cocoa, coffee, sugar, and cotton — including the paired exchange/currency comparison documents (NY vs London cocoa, raw vs white sugar, Arabica vs Robusta coffee).",
+    groups: [
+      {
+        title: "Cocoa",
+        items: [
+          { name:"Cocoa — London (XC)", ticker:"XC · ICE Europe", file:"Cocoa_LIFFE_Spread_Fundamentals.pdf", meta:["GBP/MT","10 MT"] },
+          { name:"Cocoa — NY (CC)", ticker:"CC · ICE US", file:"Cocoa_NYBOT_Spread_Fundamentals.pdf", meta:["USD/MT","10 MT","+ CC vs XC comparison"] },
+        ]
+      },
+      {
+        title: "Coffee",
+        items: [
+          { name:"Coffee C — Arabica (KC)", ticker:"KC · ICE US", file:"Coffee_C_ICE_Spread_Fundamentals.pdf", meta:["¢/lb","37,500 lb"] },
+          { name:"Robusta Coffee (RC)", ticker:"RC · ICE Europe", file:"RobustaCoffee_ICE_Spread_Fundamentals.pdf", meta:["USD/MT","10 MT","+ RC vs KC comparison"] },
+        ]
+      },
+      {
+        title: "Sugar",
+        items: [
+          { name:"Sugar No. 11 — Raw (SB)", ticker:"SB · ICE US", file:"Sugar_No11_ICE_Spread_Fundamentals.pdf", meta:["¢/lb","112,000 lb"] },
+          { name:"White Sugar No. 5 (XW)", ticker:"XW · ICE Europe", file:"WhiteSugar_No5_LIFFE_Spread_Fundamentals.pdf", meta:["USD/MT","50 MT","+ XW vs No.11 comparison"] },
+        ]
+      },
+      {
+        title: "Fibre",
+        items: [
+          { name:"Cotton No. 2 (CT)", ticker:"CT · ICE US", file:"Cotton_No2_ICE_Spread_Fundamentals.pdf", meta:["¢/lb","50,000 lb"] },
+        ]
+      },
+    ]
+  },
+
+  grains: {
+    label: "Grains & Oilseeds",
+    desc: "CBOT row crops — corn, wheat, and the full soybean complex (beans, meal, and oil) — built around the USDA data infrastructure, US crop calendar, and the crush.",
+    groups: [
+      {
+        title: "Corn & Wheat",
+        items: [
+          { name:"Corn (ZC)", ticker:"ZC · CBOT", file:"Corn_CBOT_Spread_Fundamentals.pdf", meta:["¢/bu","5,000 bu"] },
+          { name:"Wheat — Soft Red Winter (ZW)", ticker:"ZW · CBOT", file:"Wheat_CBOT_Spread_Fundamentals.pdf", meta:["¢/bu","5,000 bu"] },
+        ]
+      },
+      {
+        title: "Soybean Complex",
+        items: [
+          { name:"Soybeans (ZS)", ticker:"ZS · CBOT", file:"Soybeans_CBOT_Spread_Fundamentals.pdf", meta:["¢/bu","5,000 bu"] },
+          { name:"Soybean Meal (ZM)", ticker:"ZM · CBOT", file:"SoybeanMeal_CBOT_Spread_Fundamentals.pdf", meta:["$/short ton","100 tons"] },
+          { name:"Soybean Oil (ZL)", ticker:"ZL · CBOT", file:"SoybeanOil_CBOT_Spread_Fundamentals.pdf", meta:["¢/lb","60,000 lb"] },
+        ]
+      },
+    ]
+  },
+
+  metals: {
+    label: "Metals",
+    desc: "COMEX precious and base metals, covering monetary-asset drivers, industrial demand, and exchange inventory mechanics.",
+    groups: [
+      {
+        title: "Precious",
+        items: [
+          { name:"Gold (GC)", ticker:"GC · COMEX", file:"Gold_COMEX_Spread_Fundamentals.pdf", meta:["USD/oz","100 oz"] },
+          { name:"Silver (SI)", ticker:"SI · COMEX", file:"Silver_COMEX_Spread_Fundamentals.pdf", meta:["¢/oz","5,000 oz"] },
+        ]
+      },
+      {
+        title: "Base",
+        items: [
+          { name:"Copper (HG)", ticker:"HG · COMEX", file:"Copper_COMEX_Spread_Fundamentals.pdf", meta:["¢/lb","25,000 lb"] },
+        ]
+      },
+    ]
+  },
+
+  energy: {
+    label: "Energy",
+    desc: "NYMEX and ICE energy benchmarks — crude, refined products, and natural gas.",
+    groups: [
+      {
+        title: "Crude",
+        items: [
+          { name:"WTI Crude", ticker:"CL · NYMEX", file:"WTI_Crude_Spread_Fundamentals.pdf", meta:["USD/bbl","1,000 bbl"] },
+          { name:"ICE Brent Crude", ticker:"BRN · ICE", file:"ICE_Brent_Crude_Spread_Fundamentals.pdf", meta:["USD/bbl","1,000 bbl"] },
+        ]
+      },
+      {
+        title: "Refined Products",
+        items: [
+          { name:"RBOB Gasoline", ticker:"RB · NYMEX", file:"RBOB_NYMEX_Spread_Fundamentals.pdf", meta:["¢/gal","42,000 gal"] },
+          { name:"Heating Oil / ULSD", ticker:"HO · NYMEX", file:"HeatingOil_NYMEX_Spread_Fundamentals.pdf", meta:["¢/gal","42,000 gal"] },
+        ]
+      },
+      {
+        title: "Natural Gas",
+        items: [
+          { name:"Natural Gas (Henry Hub)", ticker:"NG · NYMEX", file:"NaturalGas_NYMEX_Spread_Fundamentals.pdf", meta:["USD/MMBtu","10,000 MMBtu"] },
+        ]
+      },
+    ]
+  },
+
+  livestock: {
+    label: "Livestock",
+    desc: "CME livestock contracts, built around the multi-year cattle cycle and the faster-moving hog cycle.",
+    groups: [
+      {
+        title: "Cattle & Hogs",
+        items: [
+          { name:"Live Cattle (EN)", ticker:"LE · CME", file:"LiveCattle_Spread_Fundamentals.pdf", meta:["¢/lb","40,000 lb"] },
+          { name:"Live Cattle (PL)", ticker:"LE · CME", file:"LiveCattle_Spready_Fundamenty_PL.pdf", meta:["¢/lb","40,000 lb","Polish version"] },
+          { name:"Lean Hog (HE)", ticker:"HE · CME", file:"Lean_Hog_Spread_Fundamentals.pdf", meta:["¢/lb","40,000 lb"] },
+        ]
+      },
+    ]
+  },
+
+  rates: {
+    label: "Rates",
+    desc: "Short-term interest rate futures.",
+    groups: [
+      {
+        title: "STIR",
+        items: [
+          { name:"3-Month SOFR", ticker:"SR3 · CME", file:"SOFR_3M_Spread_Fundamentals.pdf", meta:["IMM pricing","$1,000,000 notional"] },
+        ]
+      },
+    ]
+  },
+};
+
+/* ============================================================
+   RENDER
+============================================================ */
+const tabsEl = document.getElementById('tabs');
+const mainEl = document.getElementById('main');
+const order = ['softs','grains','metals','energy','livestock','rates'];
+
+let totalDocs = 0;
+
+order.forEach((key, i) => {
+  const cat = DATA[key];
+  const count = cat.groups.reduce((n,g)=>n+g.items.length,0);
+  totalDocs += count;
+
+  // tab button
+  const btn = document.createElement('button');
+  btn.className = 'tab-btn' + (i===0 ? ' active' : '');
+  btn.dataset.target = key;
+  btn.innerHTML = `${cat.label} <span class="count">${count}</span>`;
+  btn.addEventListener('click', () => switchTab(key));
+  tabsEl.appendChild(btn);
+
+  // panel
+  const panel = document.createElement('section');
+  panel.className = 'panel' + (i===0 ? ' active' : '');
+  panel.id = 'panel-' + key;
+
+  let html = `<p class="panel-desc">${cat.desc}</p>`;
+  cat.groups.forEach(group => {
+    html += `<div class="group-title">${group.title}</div><div class="grid">`;
+    group.items.forEach(item => {
+      const metaHtml = item.meta.map(m=>`<span>${m}</span>`).join('');
+      html += `
+        <a class="card" href="pdfs/${item.file}" target="_blank" rel="noopener">
+          <div class="card-top">
+            <div class="card-name">${item.name}</div>
+            <div class="card-ticker">${item.ticker}</div>
+          </div>
+          <div class="card-meta">${metaHtml}</div>
+          <span class="card-arrow">&#8599;</span>
+        </a>`;
+    });
+    html += `</div>`;
+  });
+
+  panel.innerHTML = html;
+  mainEl.appendChild(panel);
+});
+
+document.getElementById('totalDocs').textContent = totalDocs;
+
+function switchTab(key){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.target===key));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+key));
+  window.scrollTo({top: document.querySelector('nav.tabs').offsetTop - 10, behavior:'smooth'});
+}
+
+/* ============================================================
+   TICKER BAR — purely decorative, built from the same dataset
+============================================================ */
+const tickerSymbols = [];
+order.forEach(key => {
+  DATA[key].groups.forEach(g => g.items.forEach(item => {
+    tickerSymbols.push(item.ticker.split(' · ')[0]);
+  }));
+});
+const track = document.getElementById('tickerTrack');
+function buildTicker(){
+  let html = '';
+  // duplicate list twice for seamless loop feel
+  for(let r=0;r<2;r++){
+    tickerSymbols.forEach(sym=>{
+      const dir = Math.random() > 0.5 ? 'up' : 'dn';
+      const arrow = dir === 'up' ? '▲' : '▼';
+      const pct = (Math.random()*2.2).toFixed(2);
+      html += `<span><b>${sym}</b> <span class="${dir}">${arrow} ${pct}%</span></span>`;
+    });
+  }
+  track.innerHTML = html;
+}
+buildTicker();
+</script>
+
+</body>
+</html>
