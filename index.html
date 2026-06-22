@@ -19,6 +19,18 @@
     --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
   }
 
+  [data-theme="light"]{
+    --bg:#f5f6f8;
+    --panel:#ffffff;
+    --panel-2:#eef0f3;
+    --border:#dde1e7;
+    --text:#1a1d27;
+    --sub:#5b6270;
+    --accent:#1d7fd6;
+    --amber:#b87f15;
+    --green:#0d9b67;
+  }
+
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
@@ -27,40 +39,41 @@
     font-family:var(--sans);
     min-height:100vh;
     -webkit-font-smoothing:antialiased;
+    transition:background .2s ease, color .2s ease;
   }
 
-  /* ───────── Top ticker bar ───────── */
-  .ticker-bar{
-    background:var(--panel-2);
-    border-bottom:1px solid var(--border);
-    overflow:hidden;
-    white-space:nowrap;
-    height:30px;
+  /* ───────── Theme toggle ───────── */
+  .theme-bar{
+    max-width:1180px;
+    margin:0 auto;
+    padding:14px 28px 0;
+    display:flex;
+    justify-content:flex-end;
+  }
+  .theme-toggle{
     display:flex;
     align-items:center;
-  }
-  .ticker-track{
-    display:inline-flex;
-    animation:scroll-left 48s linear infinite;
-    padding-left:100%;
-  }
-  .ticker-track span{
+    gap:7px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--sub);
     font-family:var(--mono);
     font-size:11.5px;
-    color:var(--sub);
-    margin-right:36px;
-    letter-spacing:0.02em;
+    font-weight:600;
+    padding:7px 13px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
   }
-  .ticker-track span b{color:var(--text);font-weight:600;}
-  .ticker-track .up{color:var(--green);}
-  .ticker-track .dn{color:#ff5c6c;}
-  @keyframes scroll-left{
-    0%{transform:translateX(0);}
-    100%{transform:translateX(-100%);}
+  .theme-toggle:hover{
+    border-color:var(--accent);
+    color:var(--text);
   }
-  @media (prefers-reduced-motion: reduce){
-    .ticker-track{animation:none;}
+  .theme-toggle .icon{font-size:13px;line-height:1;}
+  @media (max-width:600px){
+    .theme-bar{padding:14px 18px 0;}
   }
+</style>
 
   /* ───────── Header ───────── */
   header{
@@ -238,13 +251,6 @@
   }
   .group-title:first-of-type{margin-top:0;}
 
-  .pair-note{
-    font-size:11.5px;
-    color:var(--sub);
-    margin-top:4px;
-  }
-  .pair-note b{color:var(--amber);font-weight:600;}
-
   footer{
     max-width:1180px;
     margin:0 auto;
@@ -271,8 +277,11 @@
 </head>
 <body>
 
-<div class="ticker-bar">
-  <div class="ticker-track" id="tickerTrack"></div>
+<div class="theme-bar">
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">
+    <span class="icon" id="themeIcon">☾</span>
+    <span id="themeLabel">Dark mode</span>
+  </button>
 </div>
 
 <header>
@@ -283,8 +292,7 @@
   Click a tab to browse by asset class, then click a market to open its PDF.</p>
   <div class="meta-row">
     <span><strong id="totalDocs">—</strong> documents</span>
-    <span><strong id="totalPages">~360</strong> pages</span>
-    <span><strong>6</strong> asset classes</span>
+    <span><strong>7</strong> asset classes</span>
   </div>
 </header>
 
@@ -306,7 +314,7 @@
 const DATA = {
   softs: {
     label: "Softs",
-    desc: "Tropical and agricultural softs traded on ICE — cocoa, coffee, sugar, and cotton — including the paired exchange/currency comparison documents (NY vs London cocoa, raw vs white sugar, Arabica vs Robusta coffee).",
+    desc: "Tropical and agricultural softs traded on ICE — cocoa, coffee, sugar, cotton, and orange juice — including the paired exchange/currency comparison documents (NY vs London cocoa, raw vs white sugar, Arabica vs Robusta coffee).",
     groups: [
       {
         title: "Cocoa",
@@ -330,9 +338,10 @@ const DATA = {
         ]
       },
       {
-        title: "Fibre",
+        title: "Fibre & Juice",
         items: [
           { name:"Cotton No. 2 (CT)", ticker:"CT · ICE US", file:"Cotton_No2_ICE_Spread_Fundamentals.pdf", meta:["¢/lb","50,000 lb"] },
+          { name:"Orange Juice — FCOJ-A (OJ)", ticker:"OJ · ICE US", file:"OrangeJuice_FCOJ_ICE_Spread_Fundamentals.pdf", meta:["¢/lb","15,000 lb solids"] },
         ]
       },
     ]
@@ -362,17 +371,24 @@ const DATA = {
 
   metals: {
     label: "Metals",
-    desc: "COMEX precious and base metals, covering monetary-asset drivers, industrial demand, and exchange inventory mechanics.",
+    desc: "COMEX precious and base metals, and NYMEX platinum group metals, covering monetary-asset drivers, industrial demand, and exchange inventory mechanics.",
     groups: [
       {
-        title: "Precious",
+        title: "Precious (COMEX)",
         items: [
           { name:"Gold (GC)", ticker:"GC · COMEX", file:"Gold_COMEX_Spread_Fundamentals.pdf", meta:["USD/oz","100 oz"] },
           { name:"Silver (SI)", ticker:"SI · COMEX", file:"Silver_COMEX_Spread_Fundamentals.pdf", meta:["¢/oz","5,000 oz"] },
         ]
       },
       {
-        title: "Base",
+        title: "Platinum Group Metals (NYMEX)",
+        items: [
+          { name:"Platinum (PL)", ticker:"PL · NYMEX", file:"Platinum_NYMEX_Spread_Fundamentals.pdf", meta:["USD/oz","50 oz"] },
+          { name:"Palladium (PA)", ticker:"PA · NYMEX", file:"Palladium_NYMEX_Spread_Fundamentals.pdf", meta:["USD/oz","100 oz","+ PL vs PA relationship"] },
+        ]
+      },
+      {
+        title: "Base (COMEX)",
         items: [
           { name:"Copper (HG)", ticker:"HG · COMEX", file:"Copper_COMEX_Spread_Fundamentals.pdf", meta:["¢/lb","25,000 lb"] },
         ]
@@ -396,6 +412,7 @@ const DATA = {
         items: [
           { name:"RBOB Gasoline", ticker:"RB · NYMEX", file:"RBOB_NYMEX_Spread_Fundamentals.pdf", meta:["¢/gal","42,000 gal"] },
           { name:"Heating Oil / ULSD", ticker:"HO · NYMEX", file:"HeatingOil_NYMEX_Spread_Fundamentals.pdf", meta:["¢/gal","42,000 gal"] },
+          { name:"Low Sulphur Gasoil", ticker:"G · ICE Europe", file:"Gasoil_ICE_Spread_Fundamentals.pdf", meta:["USD/MT","100 MT","+ HO/LSGO spread"] },
         ]
       },
       {
@@ -409,13 +426,14 @@ const DATA = {
 
   livestock: {
     label: "Livestock",
-    desc: "CME livestock contracts, built around the multi-year cattle cycle and the faster-moving hog cycle.",
+    desc: "CME livestock contracts, built around the multi-year cattle cycle, the faster-moving hog cycle, and the feeder-to-finished cattle pipeline.",
     groups: [
       {
         title: "Cattle & Hogs",
         items: [
           { name:"Live Cattle (EN)", ticker:"LE · CME", file:"LiveCattle_Spread_Fundamentals.pdf", meta:["¢/lb","40,000 lb"] },
           { name:"Live Cattle (PL)", ticker:"LE · CME", file:"LiveCattle_Spready_Fundamenty_PL.pdf", meta:["¢/lb","40,000 lb","Polish version"] },
+          { name:"Feeder Cattle (GF)", ticker:"GF · CME", file:"FeederCattle_CME_Spread_Fundamentals.pdf", meta:["¢/lb","50,000 lb"] },
           { name:"Lean Hog (HE)", ticker:"HE · CME", file:"Lean_Hog_Spread_Fundamentals.pdf", meta:["¢/lb","40,000 lb"] },
         ]
       },
@@ -435,7 +453,7 @@ const DATA = {
         ]
       },
     ]
-   },
+  },
 };
 
 /* ============================================================
@@ -496,29 +514,32 @@ function switchTab(key){
 }
 
 /* ============================================================
-   TICKER BAR — purely decorative, built from the same dataset
+   THEME TOGGLE
 ============================================================ */
-const tickerSymbols = [];
-order.forEach(key => {
-  DATA[key].groups.forEach(g => g.items.forEach(item => {
-    tickerSymbols.push(item.ticker.split(' · ')[0]);
-  }));
-});
-const track = document.getElementById('tickerTrack');
-function buildTicker(){
-  let html = '';
-  // duplicate list twice for seamless loop feel
-  for(let r=0;r<2;r++){
-    tickerSymbols.forEach(sym=>{
-      const dir = Math.random() > 0.5 ? 'up' : 'dn';
-      const arrow = dir === 'up' ? '▲' : '▼';
-      const pct = (Math.random()*2.2).toFixed(2);
-      html += `<span><b>${sym}</b> <span class="${dir}">${arrow} ${pct}%</span></span>`;
-    });
+function applyTheme(theme){
+  if(theme === 'light'){
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('themeIcon').textContent = '☀';
+    document.getElementById('themeLabel').textContent = 'Light mode';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.getElementById('themeIcon').textContent = '☾';
+    document.getElementById('themeLabel').textContent = 'Dark mode';
   }
-  track.innerHTML = html;
 }
-buildTicker();
+
+function toggleTheme(){
+  const current = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+  const next = current === 'light' ? 'dark' : 'light';
+  try { localStorage.setItem('ff-theme', next); } catch(e) {}
+  applyTheme(next);
+}
+
+(function initTheme(){
+  let saved = 'dark';
+  try { saved = localStorage.getItem('ff-theme') || 'dark'; } catch(e) {}
+  applyTheme(saved);
+})();
 </script>
 
 </body>
